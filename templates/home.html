@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome - Ask Anything{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h1>Welcome to Ask Anything 💬</h1>
+        <p>A simple platform to ask questions, share knowledge, and learn together.</p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'accounts:login' %}" class="btn btn-primary">Login</a>
+            <a href="{% url 'accounts:signup' %}" class="btn btn-outline-primary">Sign Up</a>
+        {% endif %}
+    </div>
+{% endblock %}

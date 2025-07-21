@@ -23,6 +23,7 @@ urlpatterns = [
     path('myapp/', include('myapp.urls')),  # your main app
     path('accounts/', include('accounts.urls')),  # custom accounts app
     path('accounts/', include('django.contrib.auth.urls')), 
+    path('', lambda request: render(request, 'home.html'), name='home'),
     path('', account_views.profile_view, name='profile'),
 # enables /login, /logout, etc.
 ]
