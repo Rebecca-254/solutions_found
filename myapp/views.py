@@ -1,6 +1,3 @@
-from django.shortcuts import render
-
-# Create your views here.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -13,13 +10,13 @@ def home(request):
     """Home page with all questions"""
     questions = Question.objects.all()
     search_query = request.GET.get('search', '')
-    
+
     if search_query:
         questions = questions.filter(
-            Q(title__icontains=search_query) | 
+            Q(title__icontains=search_query) |
             Q(content__icontains=search_query)
         )
-    
+
     context = {
         'questions': questions,
         'search_query': search_query,
@@ -35,33 +32,27 @@ def ask_question(request):
             question = form.save(commit=False)
             question.author = request.user
             question.save()
-            messages.success(request, 'Your question has been posted!')
-            return redirect('question_detail', pk=question.pk)
+            return redirect('myapp:question_detail', pk=question.pk)
     else:
         form = QuestionForm()
-    
     return render(request, 'myapp/ask_question.html', {'form': form})
 
 def question_detail(request, pk):
     """View a specific question and its answers"""
     question = get_object_or_404(Question, pk=pk)
-    question.views += 1
-    question.save()
-    
-    answers = question.answers.all()
-    
+    answers = Answer.objects.filter(question=question)
+
     if request.method == 'POST' and request.user.is_authenticated:
         form = AnswerForm(request.POST)
         if form.is_valid():
             answer = form.save(commit=False)
-            answer.question = question
             answer.author = request.user
+            answer.question = question
             answer.save()
-            messages.success(request, 'Your answer has been posted!')
             return redirect('myapp:question_detail', pk=question.pk)
     else:
         form = AnswerForm() if request.user.is_authenticated else None
-    
+
     context = {
         'question': question,
         'answers': answers,
@@ -71,12 +62,12 @@ def question_detail(request, pk):
 
 @login_required
 def my_questions(request):
-    """User's questions"""
+    """View questions posted by the logged-in user"""
     questions = Question.objects.filter(author=request.user)
     return render(request, 'myapp/my_questions.html', {'questions': questions})
 
 @login_required
 def my_answers(request):
-    """User's answers"""
+    """View answers posted by the logged-in user"""
     answers = Answer.objects.filter(author=request.user)
     return render(request, 'myapp/my_answers.html', {'answers': answers})

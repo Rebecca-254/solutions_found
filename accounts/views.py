@@ -10,6 +10,7 @@ from django.views.generic import CreateView
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
+from myapp.models import Question  # Adjust path as needed
 
 @csrf_protect
 def signup_view(request):
@@ -50,9 +51,9 @@ def logout_view(request):
 
 @login_required
 def profile_view(request):
-    try:
-        return render(request, 'registration/profile.html', {'user': request.user})
-    except Exception as e:
-        # Temporary simple response for debugging
-        from django.http import HttpResponse
-        return HttpResponse(f"Profile page - User: {request.user.username}, Error: {str(e)}")
+    user = request.user
+    questions = Question.objects.filter(author=user).order_by('-created_at')
+    return render(request, 'registration/profile.html', {
+        'user': user,
+        'questions': questions
+    })
